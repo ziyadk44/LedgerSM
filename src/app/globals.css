@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #e3e0d8;
+  --surface: #f8f6f2;
+  --surface-2: #edeae1;
+  --ink: #211f1c;
+  --ink-soft: #6e6a62;
+  --ink-faint: #9b968c;
+  --border: #cfc9bc;
+  --border-soft: #dfdace;
+  --brass: #93712f;
+  --brass-light: #b79657;
+  --brass-bg: #f1e7d2;
+  --granite: #211f1c;
+  --granite-2: #2c2a26;
+  --granite-3: #37342f;
+  --green: #3e6650;
+  --green-bg: #e1e9e0;
+  --amber: #a6742b;
+  --amber-bg: #f2e4c6;
+  --danger: #a2432e;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
+  --color-brass: var(--brass);
+  --color-brass-light: var(--brass-light);
+  --color-brass-bg: var(--brass-bg);
+  --color-granite: var(--granite);
+  --color-granite-2: var(--granite-2);
+  --color-granite-3: var(--granite-3);
+  --color-green: var(--green);
+  --color-green-bg: var(--green-bg);
+  --color-amber: var(--amber);
+  --color-amber-bg: var(--amber-bg);
+  --color-danger: var(--danger);
+  --font-display: var(--font-fraunces);
+  --font-body: var(--font-inter);
+  --font-mono: var(--font-plex-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--brass-light);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 6px;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+  20%,
+  80% {
+    transform: translateX(2px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-4px);
+  }
+  40%,
+  60% {
+    transform: translateX(4px);
+  }
+}
+.shake {
+  animation: shake 0.32s ease;
+}
