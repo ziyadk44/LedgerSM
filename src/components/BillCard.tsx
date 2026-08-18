@@ -8,6 +8,7 @@ import PaymentModal from "@/components/PaymentModal";
 import BillModal from "@/components/BillModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useToast } from "@/components/Toast";
+import { exportPaymentsPDF } from "@/lib/pdf";
 
 function statusFor(t: { paid: number; due: number }) {
   if (t.paid <= 0) return { label: "Unpaid", cls: "bg-[#E8E5DD] text-ink-soft" };
@@ -24,10 +25,38 @@ export default function BillCard({ bill, supplierName }: { bill: Bill; supplierN
   const [showAddPayment, setShowAddPayment] = useState(false);
   const [editPayment, setEditPayment] = useState<Payment | null>(null);
   const [deletePaymentId, setDeletePaymentId] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const t = billTotals(bill.id);
   const status = statusFor(t);
   const pays = payments.filter((p) => p.billId === bill.id).sort((a, b) => b.date.localeCompare(a.date));
+
+    async function exportBill(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (pays.length === 0) {
+      showToast("No payments recorded against this bill yet.");
+      return;
+    }
+    setExporting(true);
+    try {
+      const enriched = pays.map((p) => ({
+        ...p,
+        supplierNameResolved: supplierName,
+        billDate: bill.date,
+        billAmount: bill.amount,
+      }));
+      await exportPaymentsPDF({
+        rows: enriched,
+        subtitle: `${supplierName} · Bill dated ${fmtDate(bill.date)} · ${fmtMoney(t.amount)} total`,
+        fileTag: `bill_${bill.date}_${bill.id.slice(0, 6)}`,
+      });
+      showToast("PDF generated.");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to generate PDF.");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   return (
     <div className="mb-3 overflow-hidden rounded-lg border border-border-soft bg-surface">
@@ -59,6 +88,14 @@ export default function BillCard({ bill, supplierName }: { bill: Bill; supplierN
           </span>
         </div>
         <div className="flex shrink-0 gap-0.5">
+          <button
+            onClick={exportBill}
+            disabled={exporting}
+            className="flex h-[26px] w-[26px] items-center justify-center rounded text-ink-faint hover:bg-border-soft hover:text-ink disabled:opacity-50"
+            title="Export bill as PDF"
+          >
+            ⭳
+          </button>
           <button
             onClick={(e) => {
               e.stopPropagation();

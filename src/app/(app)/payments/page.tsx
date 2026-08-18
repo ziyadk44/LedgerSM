@@ -101,7 +101,7 @@ export default function AllPaymentsPage() {
     try {
       const enriched = chosen.map((p) => {
         const bill = bills.find((b) => b.id === p.billId);
-        return { ...p, supplierNameResolved: supplierName(bill?.supplierId), billDate: bill?.date ?? null };
+        return { ...p, supplierNameResolved: supplierName(bill?.supplierId), billDate: bill?.date ?? null ,billAmount: bill?.amount ?? 0, };
       });
       await exportPaymentsPDF({ rows: enriched, subtitle: `Selected entries (${chosen.length})`, fileTag: "selected-entries" });
       showToast("PDF generated.");

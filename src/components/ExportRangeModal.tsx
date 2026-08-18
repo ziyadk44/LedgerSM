@@ -64,6 +64,7 @@ export default function ExportRangeModal({ onClose }: { onClose: () => void }) {
           ...p,
           supplierNameResolved: supplierName(bill?.supplierId),
           billDate: bill?.date ?? null,
+          billAmount: bill?.amount ?? 0,
         };
       });
       let subtitle = `${fmtDate(from)} – ${fmtDate(to)}`;
