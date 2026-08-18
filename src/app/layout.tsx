@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import type { Metadata, Viewport } from "next";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -21,17 +21,8 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Shariq Marbles Ledger",
-  description: "Supplier payment ledger",
-  manifest: "/manifest.json",
-  icons: {
-    icon: "/icon-192.png",
-    apple: "/icon-512.png",
-  },
-};
-
-export const viewport: Viewport = {
-  themeColor: "#8A6B29",
+  title: "Shariq Marbles — Supplier Ledger",
+  description: "Supplier payment ledger for Shariq Marbles",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
