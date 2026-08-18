@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { useLedger } from "@/lib/ledger-context";
 import { fmtDate, fmtMoney } from "@/lib/format";
 import PaymentModal from "@/components/PaymentModal";
@@ -9,6 +8,7 @@ import ExportRangeModal from "@/components/ExportRangeModal";
 import { useToast } from "@/components/Toast";
 import { exportPaymentsPDF } from "@/lib/pdf";
 import type { Payment } from "@/lib/types";
+import { useMemo, useState, useEffect } from "react";
 
 type SortCol = "date" | "amount" | "supplier" | "mode";
 
@@ -27,6 +27,19 @@ export default function AllPaymentsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showExportRange, setShowExportRange] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [filterBill, setFilterBill] = useState("all");
+
+    const availableBills = useMemo(() => {
+    const list =
+      filterSupplier === "all" ? bills : bills.filter((b) => b.supplierId === filterSupplier);
+    return [...list].sort((a, b) => (a.date < b.date ? 1 : -1));
+  }, [bills, filterSupplier]);
+
+  useEffect(() => {
+    if (filterBill !== "all" && !availableBills.some((b) => b.id === filterBill)) {
+      setFilterBill("all");
+    }
+  }, [availableBills, filterBill]);
 
   const rows = useMemo(() => {
     let r = payments.map((p) => {
@@ -34,6 +47,7 @@ export default function AllPaymentsPage() {
       return { ...p, supplierId: bill?.supplierId ?? null, billDate: bill?.date ?? null };
     });
     if (filterSupplier !== "all") r = r.filter((x) => x.supplierId === filterSupplier);
+    if (filterBill !== "all") r = r.filter((x) => x.billId === filterBill);
     if (filterMode !== "all") r = r.filter((x) => x.mode === filterMode);
     if (from) r = r.filter((x) => x.date >= from);
     if (to) r = r.filter((x) => x.date <= to);
@@ -59,7 +73,7 @@ export default function AllPaymentsPage() {
       return 0;
     });
     return r;
-  }, [payments, bills, filterSupplier, filterMode, from, to, sortCol, sortDir, supplierName]);
+  }, [payments, bills, filterSupplier,filterBill, filterMode, from, to, sortCol, sortDir, supplierName]);
 
   function toggleSort(col: SortCol) {
     if (sortCol === col) {
@@ -121,6 +135,21 @@ export default function AllPaymentsPage() {
               ))}
           </select>
         </FilterField>
+
+        <FilterField label="Bill">
+          <select
+            value={filterBill}
+            onChange={(e) => setFilterBill(e.target.value)}
+            className="min-w-[160px] rounded border border-border bg-surface px-2.5 py-[7px] text-[12.5px] focus:border-brass focus:outline-none"
+          >
+            <option value="all">All bills</option>
+            {availableBills.map((b) => (
+              <option key={b.id} value={b.id}>
+                {billLabel(b)}
+              </option>
+            ))}
+          </select>
+        </FilterField>
         <FilterField label="Mode">
           <select
             value={filterMode}
@@ -152,6 +181,7 @@ export default function AllPaymentsPage() {
           <button
             onClick={() => {
               setFilterSupplier("all");
+              setFilterBill("all");
               setFilterMode("all");
               setFrom("");
               setTo("");
@@ -368,6 +398,11 @@ export default function AllPaymentsPage() {
       {showExportRange && <ExportRangeModal onClose={() => setShowExportRange(false)} />}
     </div>
   );
+}
+
+function billLabel(b: { date: string; amount: number; note?: string }) {
+  const amt = `₹${b.amount.toLocaleString("en-IN")}`;
+  return b.note ? `${fmtDate(b.date)} — ${amt} (${b.note})` : `${fmtDate(b.date)} — ${amt}`;
 }
 
 function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
