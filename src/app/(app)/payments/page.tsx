@@ -21,7 +21,7 @@ export default function AllPaymentsPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [sortCol, setSortCol] = useState<SortCol>("date");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editPayment, setEditPayment] = useState<Payment | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -80,7 +80,7 @@ export default function AllPaymentsPage() {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
       setSortCol(col);
-      setSortDir(col === "date" ? "desc" : "asc");
+      setSortDir("asc");
     }
   }
 
@@ -176,6 +176,32 @@ export default function AllPaymentsPage() {
             onChange={(e) => setTo(e.target.value)}
             className="rounded border border-border bg-surface px-2.5 py-[7px] text-[12.5px] focus:border-brass focus:outline-none"
           />
+        </FilterField>
+        <FilterField label="Sort by">
+          <div className="flex gap-1.5">
+            <select
+              value={sortCol}
+              onChange={(e) => setSortCol(e.target.value as SortCol)}
+              className="rounded border border-border bg-surface px-2.5 py-[7px] text-[12.5px] focus:border-brass focus:outline-none"
+            >
+              <option value="date">Date</option>
+              <option value="amount">Amount</option>
+            </select>
+            <button
+              type="button"
+              onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+              className="rounded border border-border bg-surface px-2.5 py-[7px] text-xs font-medium hover:bg-surface-2"
+              title="Toggle sort direction"
+            >
+              {sortDir === "asc"
+                ? sortCol === "date"
+                  ? "Oldest first ↑"
+                  : "Low to high ↑"
+                : sortCol === "date"
+                ? "Newest first ↓"
+                : "High to low ↓"}
+            </button>
+          </div>
         </FilterField>
         <FilterField label=" ">
           <button

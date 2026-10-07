@@ -16,11 +16,27 @@ export function rowToSupplier(r: any): Supplier {
   };
 }
 
+// Neon can return DATE columns as either a "YYYY-MM-DD" string or a JS Date
+// object depending on the query path. Normalize both to a clean ISO date
+// string using UTC components (a DATE column has no time/timezone, so UTC
+// avoids the value shifting a day backward/forward based on server timezone).
+function toISODateString(value: unknown): string {
+  if (value instanceof Date) {
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, "0");
+    const d = String(value.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  return String(value).slice(0, 10);
+}
+
+
 export function rowToBill(r: any): Bill {
   return {
     id: r.id,
     supplierId: r.supplier_id,
-    date: String(r.date).slice(0, 10),
+    // date: String(r.date).slice(0, 10),
+    date: toISODateString(r.date),
     amount: Number(r.amount),
     note: r.note ?? "",
     createdAt: Number(r.created_at),
@@ -31,7 +47,8 @@ export function rowToPayment(r: any): Payment {
   return {
     id: r.id,
     billId: r.bill_id,
-    date: String(r.date).slice(0, 10),
+    // date: String(r.date).slice(0, 10),
+    date: toISODateString(r.date),
     amount: Number(r.amount),
     mode: r.mode,
     note: r.note ?? "",

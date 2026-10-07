@@ -29,7 +29,8 @@ export default function BillCard({ bill, supplierName }: { bill: Bill; supplierN
 
   const t = billTotals(bill.id);
   const status = statusFor(t);
-  const pays = payments.filter((p) => p.billId === bill.id).sort((a, b) => b.date.localeCompare(a.date));
+  // const pays = payments.filter((p) => p.billId === bill.id).sort((a, b) => b.date.localeCompare(a.date));
+  const pays = payments.filter((p) => p.billId === bill.id).sort((a, b) => a.date.localeCompare(b.date));
 
     async function exportBill(e: React.MouseEvent) {
     e.stopPropagation();
@@ -94,7 +95,12 @@ export default function BillCard({ bill, supplierName }: { bill: Bill; supplierN
             className="flex h-[26px] w-[26px] items-center justify-center rounded text-ink-faint hover:bg-border-soft hover:text-ink disabled:opacity-50"
             title="Export bill as PDF"
           >
-            ⭳
+            {/* ⭳ */}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
           </button>
           <button
             onClick={(e) => {
