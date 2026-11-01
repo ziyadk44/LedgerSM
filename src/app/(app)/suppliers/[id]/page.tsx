@@ -66,7 +66,7 @@ export default function SupplierLedgerPage() {
       </div>
 
       <div className="mb-[22px] grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatCard label="Total Billed" value={fmtMoney(t.billed)} />
+        <StatCard label="Pending Bills" value={fmtMoney(t.billed)} />
         <StatCard label="Total Paid" value={fmtMoney(t.paid)} tone="paid" />
         <StatCard label="Balance Due" value={fmtMoney(t.due)} tone="due" />
       </div>

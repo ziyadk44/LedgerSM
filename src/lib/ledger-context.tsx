@@ -166,6 +166,7 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
       let paid = 0;
       for (const b of bills) {
         const t = billTotals(b.id);
+        if (t.due <= 0.01) continue; // settled bill: leave it out of billed/paid
         billed += t.amount;
         paid += t.paid;
       }
