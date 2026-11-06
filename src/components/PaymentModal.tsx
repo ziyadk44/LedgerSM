@@ -7,6 +7,7 @@ import { useLedger } from "@/lib/ledger-context";
 import { useToast } from "@/components/Toast";
 import { fmtDate, fmtMoney, todayISO } from "@/lib/format";
 import type { Payment, PaymentMode } from "@/lib/types";
+import { getBreakdown } from "@/lib/breakdown";
 
 export default function PaymentModal({
   billId,
@@ -21,7 +22,7 @@ export default function PaymentModal({
   payment?: Payment | null;
   onClose: () => void;
 }) {
-  const { addPayment, updatePayment } = useLedger();
+  const { addPayment, updatePayment, bills, payments } = useLedger();
   const { showToast } = useToast();
   const [date, setDate] = useState(payment?.date ?? todayISO());
   const [amount, setAmount] = useState(payment ? String(payment.amount) : "");
@@ -29,6 +30,19 @@ export default function PaymentModal({
   const [note, setNote] = useState(payment?.note ?? "");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const bill = bills.find((b) => b.id === billId);
+  const breakdown = bill ? getBreakdown(bill, payments) : null;
+
+  // How far the typed amount exceeds what's left in the chosen category
+  // (when editing, this payment's own old amount is added back first)
+  let overBy = 0;
+  const amtNum = parseFloat(amount);
+  if (breakdown && !isNaN(amtNum)) {
+    const dueForMode = mode === "cash" ? breakdown.cashDue : breakdown.onlineDue;
+    const addBack = payment && payment.mode === mode ? Number(payment.amount) : 0;
+    overBy = Math.round((amtNum - (dueForMode + addBack)) * 100) / 100;
+  }
 
   async function save() {
     const amt = parseFloat(amount);
@@ -77,6 +91,22 @@ export default function PaymentModal({
           )}
         </p>
       )}
+
+      {breakdown && (
+        <div className="mb-4 grid grid-cols-2 gap-2.5">
+          <div className={`rounded border px-3 py-2 ${mode === "cash" ? "border-brass bg-brass-bg" : "border-border-soft bg-surface-2"}`}>
+            <div className="text-[10.5px] uppercase tracking-[0.06em] text-ink-faint">Cash due</div>
+            <div className="font-mono text-sm font-semibold text-amber">{fmtMoney(breakdown.cashDue)}</div>
+            <div className="text-[11px] text-ink-faint">of {fmtMoney(breakdown.cashTotal)}</div>
+          </div>
+          <div className={`rounded border px-3 py-2 ${mode === "online" ? "border-brass bg-brass-bg" : "border-border-soft bg-surface-2"}`}>
+            <div className="text-[10.5px] uppercase tracking-[0.06em] text-ink-faint">Online due</div>
+            <div className="font-mono text-sm font-semibold text-amber">{fmtMoney(breakdown.onlineDue)}</div>
+            <div className="text-[11px] text-ink-faint">of {fmtMoney(breakdown.onlineTotal)}</div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex-1">
           <Field label="Payment date *">
@@ -97,6 +127,13 @@ export default function PaymentModal({
           </Field>
         </div>
       </div>
+
+      {overBy > 0.01 && (
+        <p className="-mt-1 mb-4 text-[12px] text-amber">
+          Heads up: this is {fmtMoney(overBy)} more than the {mode === "cash" ? "cash" : "online"} amount still due on this bill. You can still save it.
+        </p>
+      )}
+      
       <Field label="Payment mode *">
         <div className="flex gap-2.5">
           <button

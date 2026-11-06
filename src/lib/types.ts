@@ -12,6 +12,7 @@ export type Bill = {
   date: string; // ISO yyyy-mm-dd
   amount: number;
   note: string;
+  cashAmount: number | null; // null = bill is not split
   createdAt: number;
 };
 

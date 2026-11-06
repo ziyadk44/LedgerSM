@@ -53,6 +53,7 @@ export async function ensureSchema() {
       created_at BIGINT NOT NULL
     )
   `;
+  await db`ALTER TABLE bills ADD COLUMN IF NOT EXISTS cash_amount NUMERIC(12,2)`;
   await db`
     CREATE TABLE IF NOT EXISTS payments (
       id TEXT PRIMARY KEY,

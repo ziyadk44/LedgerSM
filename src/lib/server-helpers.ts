@@ -39,6 +39,7 @@ export function rowToBill(r: any): Bill {
     date: toISODateString(r.date),
     amount: Number(r.amount),
     note: r.note ?? "",
+    cashAmount: r.cash_amount === null || r.cash_amount === undefined ? null : Number(r.cash_amount),
     createdAt: Number(r.created_at),
   };
 }
@@ -62,4 +63,14 @@ export function isValidDate(s: unknown): s is string {
 
 export function isValidAmount(n: unknown): n is number {
   return typeof n === "number" && isFinite(n) && n > 0;
+}
+
+export function parseCashAmount(
+  raw: unknown,
+  total: number
+): { ok: true; value: number | null } | { ok: false } {
+  if (raw === null || raw === undefined || raw === "") return { ok: true, value: null };
+  const n = Number(raw);
+  if (!isFinite(n) || n < 0 || n > total) return { ok: false };
+  return { ok: true, value: Math.round(n * 100) / 100 };
 }

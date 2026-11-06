@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, ensureSchema } from "@/lib/db";
-import { isValidAmount, isValidDate, newId, rowToBill } from "@/lib/server-helpers";
+import { isValidAmount, isValidDate, newId,parseCashAmount, rowToBill } from "@/lib/server-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -23,12 +23,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Amount must be greater than 0." }, { status: 400 });
     }
 
+    const cash = parseCashAmount(body?.cashAmount, amount);
+    if (!cash.ok) {
+      return NextResponse.json({ error: "Cash amount must be between 0 and the bill total." }, { status: 400 });
+    }
+
     const sql = db();
     const id = newId("bill");
     const createdAt = Date.now();
     const rows = await sql`
-      INSERT INTO bills (id, supplier_id, date, amount, note, created_at)
-      VALUES (${id}, ${supplierId}, ${date}, ${amount}, ${note}, ${createdAt})
+      INSERT INTO bills (id, supplier_id, date, amount, note, cash_amount, created_at)
+      VALUES (${id}, ${supplierId}, ${date}, ${amount}, ${note}, ${cash.value}, ${createdAt})
       RETURNING *
     `;
     return NextResponse.json(rowToBill(rows[0]), { status: 201 });

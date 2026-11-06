@@ -9,6 +9,7 @@ import BillModal from "@/components/BillModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useToast } from "@/components/Toast";
 import { exportPaymentsPDF } from "@/lib/pdf";
+import { getBreakdown } from "@/lib/breakdown";
 
 function statusFor(t: { paid: number; due: number }) {
   if (t.paid <= 0) return { label: "Unpaid", cls: "bg-[#E8E5DD] text-ink-soft" };
@@ -29,6 +30,7 @@ export default function BillCard({ bill, supplierName }: { bill: Bill; supplierN
 
   const t = billTotals(bill.id);
   const status = statusFor(t);
+  const breakdown = getBreakdown(bill, payments);
   // const pays = payments.filter((p) => p.billId === bill.id).sort((a, b) => b.date.localeCompare(a.date));
   const pays = payments.filter((p) => p.billId === bill.id).sort((a, b) => a.date.localeCompare(b.date));
 
@@ -124,7 +126,16 @@ export default function BillCard({ bill, supplierName }: { bill: Bill; supplierN
           </button>
         </div>
       </div>
-
+      {breakdown && (
+        <div className="flex flex-wrap gap-2 px-4 pb-3 text-xs sm:px-[18px]">
+          <span className="rounded-full bg-[#E9E4D6] px-2.5 py-1 font-mono text-[#7A5E23]">
+            Cash due {fmtMoney(breakdown.cashDue)} <span className="opacity-60">/ {fmtMoney(breakdown.cashTotal)}</span>
+          </span>
+          <span className="rounded-full bg-[#DCE6EC] px-2.5 py-1 font-mono text-[#385A70]">
+            Online due {fmtMoney(breakdown.onlineDue)} <span className="opacity-60">/ {fmtMoney(breakdown.onlineTotal)}</span>
+          </span>
+        </div>
+      )}
       {expanded && (
         <div className="border-t border-border-soft bg-surface-2 px-4 pb-[18px] pt-3.5 sm:px-[18px]">
           <div className="mb-2.5 flex items-center justify-between">

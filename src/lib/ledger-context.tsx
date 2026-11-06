@@ -26,8 +26,8 @@ type Ctx = {
   ) => Promise<void>;
   deleteSupplier: (id: string) => Promise<void>;
 
-  addBill: (input: { supplierId: string; date: string; amount: number; note?: string }) => Promise<Bill>;
-  updateBill: (id: string, input: { date: string; amount: number; note?: string }) => Promise<void>;
+  addBill: (input: { supplierId: string; date: string; amount: number; note?: string; cashAmount?: number | null }) => Promise<Bill>;
+  updateBill: (id: string, input: { date: string; amount: number; note?: string; cashAmount?: number | null }) => Promise<void>;
   deleteBill: (id: string) => Promise<void>;
 
   addPayment: (input: {

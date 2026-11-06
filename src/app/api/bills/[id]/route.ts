@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, ensureSchema } from "@/lib/db";
-import { isValidAmount, isValidDate, rowToBill } from "@/lib/server-helpers";
+import { isValidAmount, isValidDate, parseCashAmount, rowToBill } from "@/lib/server-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -20,9 +20,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Amount must be greater than 0." }, { status: 400 });
     }
 
+    const cash = parseCashAmount(body?.cashAmount, amount);
+    if (!cash.ok) {
+      return NextResponse.json({ error: "Cash amount must be between 0 and the bill total." }, { status: 400 });
+    }
+
     const sql = db();
     const rows = await sql`
-      UPDATE bills SET date = ${date}, amount = ${amount}, note = ${note}
+      UPDATE bills SET date = ${date}, amount = ${amount}, note = ${note}, cash_amount = ${cash.value}
       WHERE id = ${id}
       RETURNING *
     `;
